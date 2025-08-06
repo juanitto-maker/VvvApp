@@ -1,41 +1,30 @@
 {
-  "name": "vvvebjs",
-  "description": "Drag and drop website builder javascript library",
-  "version": "0.0.1",
-  "author": "Ziadin Givan",
+  "name": "vvvebjs-ai-designer",
+  "description": "AI-powered drag and drop website builder",
+  "version": "1.0.0",
+  "author": "AI Designer",
   "license": "Apache-2.0",
-  "homepage": "https://www.vvveb.com/vvvebjs/editor.html",
-  "main": "libs/builder/builder.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/givanz/VvvebJs.git"
+  "main": "editor.html",
+  "engines": {
+    "node": "18.x"
+  },
+  "scripts": {
+    "build": "echo 'Static site - no build needed'",
+    "dev": "vercel dev",
+    "deploy": "vercel"
   },
   "dependencies": {
-    "express": "^4.19.2"
+    "@vercel/node": "^3.0.0"
+  },
+  "devDependencies": {
+    "vercel": "^32.0.0"
   },
   "keywords": [
     "vvvebjs",
     "drag-drop",
-    "drag&drop",
-    "drag",
-    "drop",
     "wysiwyg",
-    "web",
-    "template",
-    "editor",
-    "site",
-    "builder"
-  ],
-  "scripts": {
-    "gulp": "gulp",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "devDependencies": {
-    "gulp": "^4.0.2",
-    "gulp-file-include": "^2.3.0",
-    "gulp-format-html": "^1.2.5",
-    "gulp-sass": "^5.1.0",
-    "node-sass": "^8.0.0",
-    "sass": "^1.60.0"
-  }
+    "web-builder",
+    "ai-designer",
+    "mobile-friendly"
+  ]
 }
