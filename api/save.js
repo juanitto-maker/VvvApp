@@ -1,9 +1,11 @@
 // File: api/save.js
+// Fixed Vercel serverless function for VvvebJs
+
 export default async function handler(req, res) {
   // Set CORS headers for all requests
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
@@ -11,12 +13,24 @@ export default async function handler(req, res) {
     return;
   }
 
+  // Handle GET requests (for testing)
+  if (req.method === 'GET') {
+    return res.status(200).json({ 
+      success: true, 
+      message: 'VvvebJs Save API is working!',
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Handle POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { action, file, html, startTemplateUrl, title, folder } = req.body;
+    const { action, file, html, startTemplateUrl, title, folder, url } = req.body;
+
+    console.log('API called with action:', action);
 
     // Handle different actions
     switch (action) {
@@ -38,13 +52,24 @@ export default async function handler(req, res) {
         
       case 'oembedProxy':
         return await handleOEmbedProxy(req, res);
+
+      case 'test':
+        return res.status(200).json({ 
+          success: true, 
+          message: 'Test successful',
+          timestamp: new Date().toISOString()
+        });
       
       default:
-        return res.status(400).json({ error: 'Invalid action' });
+        return res.status(400).json({ error: `Invalid action: ${action}` });
     }
   } catch (error) {
     console.error('Server error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
   }
 }
 
@@ -55,6 +80,8 @@ async function handleSave(req, res) {
     return res.status(400).json({ error: 'Missing file or html content' });
   }
 
+  console.log(`Saving file: ${file}, HTML length: ${html.length}`);
+
   // For Vercel, we can't write files to filesystem
   // Instead, we'll return success and let client handle local storage
   // In production, you'd want to integrate with a database or external storage
@@ -63,7 +90,8 @@ async function handleSave(req, res) {
   const savedContent = {
     file: file,
     timestamp: new Date().toISOString(),
-    size: html.length
+    size: html.length,
+    success: true
   };
 
   return res.status(200).json({
@@ -75,6 +103,8 @@ async function handleSave(req, res) {
 
 async function handleNewPage(req, res) {
   const { startTemplateUrl, title, file, folder } = req.body;
+  
+  console.log('Creating new page:', { title, file, folder });
   
   // Template content based on startTemplateUrl
   let templateContent = getBlankTemplate();
@@ -99,6 +129,8 @@ async function handleNewPage(req, res) {
 async function handleDelete(req, res) {
   const { file } = req.body;
   
+  console.log('Deleting file:', file);
+  
   return res.status(200).json({
     success: true,
     message: `File ${file} deleted successfully`
@@ -108,6 +140,8 @@ async function handleDelete(req, res) {
 async function handleRename(req, res) {
   const { oldName, newName } = req.body;
   
+  console.log('Renaming file:', oldName, 'to', newName);
+  
   return res.status(200).json({
     success: true,
     message: `File renamed from ${oldName} to ${newName}`
@@ -116,6 +150,8 @@ async function handleRename(req, res) {
 
 async function handleSaveReusable(req, res) {
   const { name, html } = req.body;
+  
+  console.log('Saving reusable component:', name);
   
   return res.status(200).json({
     success: true,
@@ -132,12 +168,15 @@ async function handleOEmbedProxy(req, res) {
   }
 
   try {
+    console.log('OEmbed proxy for:', url);
+    
     // Simple oEmbed proxy
     const response = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`);
     const data = await response.json();
     
     return res.status(200).json(data);
   } catch (error) {
+    console.error('OEmbed proxy error:', error);
     return res.status(500).json({ error: 'Failed to fetch oEmbed data' });
   }
 }
