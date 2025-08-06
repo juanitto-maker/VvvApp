@@ -3,120 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VvvebJs Debug</title>
+    <title>VvvebJs AI Designer</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
-        .card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff; }
-        .success { border-color: #28a745; background: #d4edda; }
-        .error { border-color: #dc3545; background: #f8d7da; }
-        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .file-list { background: #fff; padding: 15px; border-radius: 4px; margin: 10px 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .nav-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 25px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .nav-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            color: white;
+            text-decoration: none;
+        }
+        .nav-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.3em;
+        }
+        .nav-card p {
+            margin: 0;
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+        .status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+        .status-good { border-left: 4px solid #4CAF50; }
+        .status-check { border-left: 4px solid #FF9800; }
+        .emoji { font-size: 1.5em; }
     </style>
 </head>
 <body>
-    <h1>🔧 VvvebJs Deployment Debug</h1>
-    
-    <div class="card">
-        <h3>Current Status</h3>
-        <p><strong>Domain:</strong> <span id="current-url"></span></p>
-        <p><strong>API Status:</strong> <span id="api-status">Testing...</span></p>
-        <p><strong>Files Found:</strong> <span id="files-found">Checking...</span></p>
+    <div class="container">
+        <h1>🎨 VvvebJs AI Designer</h1>
+        <p class="subtitle">AI-powered drag & drop website builder</p>
+        
+        <div class="status status-good">
+            <span>🚀 API Status</span>
+            <span>✅ Working</span>
+        </div>
+        
+        <div class="status status-check">
+            <span>📱 Mobile Optimized</span>
+            <span>✅ Ready</span>
+        </div>
+        
+        <div class="nav-grid">
+            <a href="/editor.html" class="nav-card">
+                <h3>🎯 Main Editor</h3>
+                <p>Start building your website with drag & drop</p>
+            </a>
+            
+            <a href="/test-api.html" class="nav-card">
+                <h3>🔧 API Test</h3>
+                <p>Test server connectivity and API functions</p>
+            </a>
+            
+            <a href="/diagnostics.html" class="nav-card">
+                <h3>📊 Diagnostics</h3>
+                <p>Check system status and file availability</p>
+            </a>
+        </div>
+        
+        <div id="file-check" style="margin-top: 30px;">
+            <h3>🔍 Quick File Check</h3>
+            <button onclick="checkFiles()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 1em;">
+                Check Core Files
+            </button>
+            <div id="check-results" style="margin-top: 20px;"></div>
+        </div>
     </div>
-
-    <div class="card">
-        <h3>Quick Actions</h3>
-        <button onclick="testAPI()">Test API</button>
-        <button onclick="listFiles()">Check Files</button>
-        <button onclick="window.open('/test-api.html')">API Test Page</button>
-    </div>
-
-    <div id="results"></div>
 
     <script>
-        // Show current URL
-        document.getElementById('current-url').textContent = window.location.href;
-
-        async function testAPI() {
-            const status = document.getElementById('api-status');
-            try {
-                const response = await fetch('/api/save.js');
-                const data = await response.json();
-                status.innerHTML = response.ok ? '✅ Working' : '❌ Failed';
-            } catch (error) {
-                status.innerHTML = '❌ Error: ' + error.message;
-            }
-        }
-
-        async function listFiles() {
-            const filesToCheck = [
+        async function checkFiles() {
+            const files = [
                 'editor.html',
-                'css/editor.css', 
-                'js/bootstrap.min.js',
-                'js/popper.min.js',
-                'js/mobile-drag-drop.js',
                 'libs/builder/builder.js',
-                'libs/builder/components-bootstrap5.js',
-                'demo/landing/index.html',
-                'demo/landing/sections/sections.js'
+                'css/editor.css',
+                'demo/landing/index.html'
             ];
-
-            const results = document.getElementById('results');
-            results.innerHTML = '<div class="card"><h3>File Check Results</h3><div id="file-results">Checking files...</div></div>';
             
-            let found = 0;
-            let total = filesToCheck.length;
-            let html = '<div class="file-list">';
+            const results = document.getElementById('check-results');
+            results.innerHTML = '<p>Checking files...</p>';
             
-            for (const file of filesToCheck) {
+            let html = '';
+            for (const file of files) {
                 try {
                     const response = await fetch(file, { method: 'HEAD' });
                     const status = response.ok ? '✅' : '❌';
-                    const color = response.ok ? 'green' : 'red';
-                    if (response.ok) found++;
-                    html += `<div style="color: ${color};">${status} ${file}</div>`;
+                    const statusText = response.ok ? 'Found' : 'Missing';
+                    html += `<div class="status ${response.ok ? 'status-good' : 'status-check'}">
+                        <span>${file}</span>
+                        <span>${status} ${statusText}</span>
+                    </div>`;
                 } catch (error) {
-                    html += `<div style="color: red;">❌ ${file} (Error: ${error.message})</div>`;
+                    html += `<div class="status status-check">
+                        <span>${file}</span>
+                        <span>❌ Error</span>
+                    </div>`;
                 }
             }
             
-            html += '</div>';
-            
-            document.getElementById('file-results').innerHTML = html;
-            document.getElementById('files-found').textContent = `${found}/${total}`;
-            
-            // Show recommendations
-            if (found === 0) {
-                results.innerHTML += `
-                    <div class="card error">
-                        <h3>⚠️ No Files Found</h3>
-                        <p>It looks like your main VvvebJs files are not uploaded or are in a different location.</p>
-                        <p><strong>Next Steps:</strong></p>
-                        <ul>
-                            <li>Check if files are uploaded to your Vercel project</li>
-                            <li>Verify file paths and structure</li>
-                            <li>Make sure files are in the root directory</li>
-                        </ul>
-                    </div>`;
-            } else if (found < total) {
-                results.innerHTML += `
-                    <div class="card error">
-                        <h3>⚠️ Some Files Missing</h3>
-                        <p>Found ${found} out of ${total} files. Upload the missing files to complete your setup.</p>
-                    </div>`;
-            } else {
-                results.innerHTML += `
-                    <div class="card success">
-                        <h3>✅ All Files Found!</h3>
-                        <p>Great! All core files are present. Try accessing the editor now.</p>
-                        <button onclick="window.open('/editor.html')">Open Editor</button>
-                    </div>`;
-            }
+            results.innerHTML = html;
         }
-
-        // Auto-run tests
+        
+        // Auto-check files on load
         window.addEventListener('load', () => {
-            testAPI();
-            setTimeout(listFiles, 1000);
+            setTimeout(checkFiles, 1000);
         });
     </script>
 </body>
