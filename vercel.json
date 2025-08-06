@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build"
+    }
+  ],
+  "functions": {
+    "api/save.js": {
+      "maxDuration": 30
+    }
+  },
+  "routes": [
+    {
+      "src": "/save.php",
+      "dest": "/api/save.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "buildCommand": "echo 'No build needed'",
+  "outputDirectory": "."
+}
