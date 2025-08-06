@@ -9,7 +9,6 @@
     "node": "18.x"
   },
   "scripts": {
-    "build": "echo 'Static site - no build needed'",
     "dev": "vercel dev",
     "deploy": "vercel"
   },
