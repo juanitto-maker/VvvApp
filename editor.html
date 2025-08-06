@@ -1,220 +1,678 @@
-<!DOCTYPE html>
+		<!DOCTYPE html>
 <html lang="en" data-bs-theme="auto">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <meta name="description" content="">
+    <meta name="description" content="AI-powered drag and drop website builder">
     <meta name="author" content="">
     <link rel="icon" href="favicon.ico">
     <base href="">
-    <title>VvvebJs</title>
+    <title>VvvebJs - AI Designer</title>
     
     <link href="css/editor.css" rel="stylesheet">
-  </head>
+    
+    <!-- Mobile optimizations -->
+    <style>
+        /* Mobile responsive improvements */
+        @media (max-width: 768px) {
+            #vvveb-builder {
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+            }
+            
+            #top-panel {
+                padding: 8px;
+                flex-shrink: 0;
+            }
+            
+            #left-panel {
+                width: 100% !important;
+                height: 40vh;
+                overflow-y: auto;
+            }
+            
+            #canvas {
+                flex: 1;
+                min-height: 50vh;
+            }
+            
+            #right-panel {
+                width: 100% !important;
+                height: 40vh;
+                overflow-y: auto;
+            }
+            
+            /* Hide panels by default on mobile */
+            .mobile-hide {
+                display: none !important;
+            }
+            
+            /* Larger touch targets */
+            .btn {
+                min-height: 44px;
+                padding: 12px 16px;
+                margin: 2px;
+            }
+            
+            /* Improved mobile navigation */
+            .responsive-btns .btn {
+                min-width: 48px;
+            }
+            
+            /* Better mobile drag areas */
+            .drag-elements li {
+                padding: 15px 10px;
+                border: 1px solid #ddd;
+                margin: 5px 0;
+                border-radius: 6px;
+                background: white;
+                touch-action: none;
+            }
+        }
+        
+        /* Loading indicator */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            color: white;
+        }
+        
+        .loading-overlay.hidden {
+            display: none;
+        }
+    </style>
+</head>
 <body>
 
-	<div id="vvveb-builder">
-				<div id="top-panel">
-					<img src="img/logo.png" alt="Vvveb" class="float-start" id="logo">
-					
-					<div class="btn-group float-start" role="group">
-					  <button class="btn btn-light" title="Toggle file manager" id="toggle-file-manager-btn" data-vvveb-action="toggleFileManager" data-bs-toggle="button" aria-pressed="false">
-						  <img src="libs/builder/icons/file-manager-layout.svg" width="18" height="18" alt="" role="presentation">
-					  </button>
+<!-- Loading overlay -->
+<div id="loading-overlay" class="loading-overlay hidden">
+    <div class="text-center">
+        <div class="spinner-border text-light" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <p class="mt-2">Loading AI Designer...</p>
+    </div>
+</div>
 
-					  <button class="btn btn-light" title="Toggle left column" id="toggle-left-column-btn" data-vvveb-action="toggleLeftColumn" data-bs-toggle="button" aria-pressed="false">
-						  <img src="libs/builder/icons/left-column-layout.svg" width="18" height="18" alt="" role="presentation">
-					  </button>
-					  
-					  <button class="btn btn-light" title="Toggle right column" id="toggle-right-column-btn" data-vvveb-action="toggleRightColumn" data-bs-toggle="button" aria-pressed="false">
-						  <img src="libs/builder/icons/right-column-layout.svg" width="18" height="18" alt="" role="presentation">
-					  </button>
-					</div>
+<div id="vvveb-builder">
+    <div id="top-panel">
+        <img src="img/logo.png" alt="VvvebJs AI" class="float-start" id="logo">
+        
+        <!-- Mobile panel toggles -->
+        <div class="btn-group float-start" role="group">
+            <button class="btn btn-light" title="Toggle components panel" id="toggle-left-panel-mobile" data-vvveb-action="toggleLeftColumn" data-bs-toggle="button" aria-pressed="false">
+                <i class="icon-layers-outline"></i>
+            </button>
+            
+            <button class="btn btn-light" title="Toggle properties panel" id="toggle-right-panel-mobile" data-vvveb-action="toggleRightColumn" data-bs-toggle="button" aria-pressed="false">
+                <i class="icon-settings-outline"></i>
+            </button>
+        </div>
 
-					<div class="btn-group me-3" role="group">
-					  <button class="btn btn-light" title="Undo (Ctrl/Cmd + Z)" id="undo-btn" data-vvveb-action="undo" data-vvveb-shortcut="ctrl+z">
-						  <i class="la la-undo"></i>
-					  </button>
+        <div class="btn-group me-3" role="group">
+            <button class="btn btn-light" title="Undo (Ctrl/Cmd + Z)" id="undo-btn" data-vvveb-action="undo" data-vvveb-shortcut="ctrl+z">
+                <i class="la la-undo"></i>
+            </button>
 
             <button class="btn btn-light" title="Redo (Ctrl/Cmd + Shift + Y)" id="redo-btn" data-vvveb-action="redo" data-vvveb-shortcut="ctrl+shift+z">
-              <i class="la la-undo la-flip-horizontal"></i>
-					  </button>
-					</div>
-										
-					
-					<div class="btn-group me-3" role="group">
-					  <button class="btn btn-light" title="Designer Mode (Free dragging)" id="designer-mode-btn" data-bs-toggle="button" aria-pressed="false" data-vvveb-action="setDesignerMode">
-						  <i class="la la-hand-rock"></i>
-					  </button>
-
-					  <button class="btn btn-light" title="Preview" id="preview-btn" type="button" data-bs-toggle="button" aria-pressed="false" data-vvveb-action="preview">
+                <i class="la la-undo la-flip-horizontal"></i>
+            </button>
+        </div>
+        
+        <div class="btn-group me-3" role="group">
+            <button class="btn btn-light" title="Preview" id="preview-btn" type="button" data-bs-toggle="button" aria-pressed="false" data-vvveb-action="preview">
                 <i class="icon-eye-outline"></i>
-					  </button>
+            </button>
 
-					  <button class="btn btn-light" title="Fullscreen (F11)" id="fullscreen-btn" data-bs-toggle="button" aria-pressed="false" data-vvveb-action="fullscreen">
-						  <i class="icon-expand-outline"></i>
-					  </button>
+            <button class="btn btn-light" title="Download" id="download-btn" data-vvveb-action="download" data-v-download="index.html">
+                <i class="la la-download"></i>
+            </button>
+        </div>
+        
+        <div class="btn-group me-2 float-end" role="group">
+            <button class="btn btn-primary btn-sm btn-icon save-btn" title="Save (Ctrl + S)" id="save-btn" data-vvveb-action="saveAjax" data-vvveb-url="api/save.js" data-v-vvveb-shortcut="ctrl+s">
+                <span class="loading d-none">
+                    <i class="icon-save-outline"></i>
+                    <span class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span>
+                    <span>Saving...</span>
+                </span>
 
-					  <button class="btn btn-light active" title="Toggle navigator (Ctrl + Shift + N)" id="toggle-tree-list" data-bs-toggle="button" data-vvveb-action="toggleTreeList" aria-pressed="true">
-						  <i class="icon-layers-outline"></i>
-					  </button>
+                <span class="button-text">
+                    <i class="icon-save-outline"></i> <span>Save</span>
+                </span>    
+            </button>
+        </div>    
 
-					  <button class="btn btn-light" title="Download" id="download-btn" data-vvveb-action="download" data-v-download="index.html">
-						  <i class="la la-download"></i>
-					  </button>
+        <div class="float-end me-3">
+            <button class="btn btn-light border-0 btn-sm btn-dark-mode" data-vvveb-action="darkMode">
+                <i class="la la-sun"></i>
+            </button>
+            
+            <div class="btn-group responsive-btns d-none d-md-flex" role="group">
+                <button id="mobile-view" data-view="mobile" class="btn btn-light" title="Mobile view" data-vvveb-action="viewport">
+                    <i class="la la-mobile"></i>
+                </button>
 
-					</div>
-					
-								
-					<div class="btn-group me-2 float-end" role="group">
-					  <button class="btn btn-primary btn-sm btn-icon save-btn" title="Save (Ctrl + S)" id="save-btn" data-vvveb-action="saveAjax" data-vvveb-url="save.php" data-v-vvveb-shortcut="ctrl+e">
+                <button id="tablet-view" data-view="tablet" class="btn btn-light" title="Tablet view" data-vvveb-action="viewport">
+                    <i class="la la-tablet"></i>
+                </button>
+                
+                <button id="desktop-view" data-view="" class="btn btn-light" title="Desktop view" data-vvveb-action="viewport">
+                    <i class="la la-laptop"></i>
+                </button>
 
-						<span class="loading d-none">
-						<i class="icon-save-outline"></i>
-						  <span class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true">
-						  </span>
-						  <span>Saving </span> ... </span>
+                <div class="percent">
+                    <input type="number" id="zoom" value="100" step="10" min="10" max="100" class="form-control" data-vvveb-action="zoomChange" data-vvveb-on="change">
+                </div>
+            </div>
+        </div>    
+    </div>
 
-						<span class="button-text">
-						  <i class="icon-save-outline"></i> <span>Save page</span>
-						</span>	
+    <div id="left-panel" class="mobile-hide">
+        <div>
+            <div id="filemanager"> 
+                <div class="header">
+                    <span class="text-secondary"><i class="la la-file la-lg"></i> Pages</span>
+                    <div class="btn-group responsive-btns float-end" role="group">
+                        <button class="btn btn-outline-primary btn-sm btn-add" title="New page" id="new-file-btn" data-vvveb-action="newPage">
+                            <i class="icon-add"></i>
+                        </button>
+                    </div>
+                </div>
 
-					  </button>
-					</div>	
+                <div class="tree">
+                    <ol></ol>
+                </div>
+            </div>
+            
+            <div class="drag-elements">
+                <div class="header">
+                    <ul class="nav nav-tabs nav-fill" id="elements-tabs" role="tablist">
+                        <li class="nav-item sections-tab">
+                            <a class="nav-link active" id="sections-tab" data-bs-toggle="tab" href="#sections" role="tab" aria-controls="sections" aria-selected="true" title="Sections">
+                                <i class="icon-layers-outline"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item component-tab">
+                            <a class="nav-link" id="components-tab" data-bs-toggle="tab" href="#components-tabs" role="tab" aria-controls="components" aria-selected="false" title="Components">
+                                <i class="icon-cube-outline"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item component-configuration-tab">
+                            <a class="nav-link" id="configuration-tab" data-bs-toggle="tab" href="#configuration" role="tab" aria-controls="configuration" aria-selected="false" title="Styles">
+                                <i class="icon-color-wand-outline"></i>
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content">
+                        <div class="tab-pane show active sections" id="sections" role="tabpanel" aria-labelledby="sections-tab">
+                            <ul class="nav nav-tabs nav-fill nav-underline sections-tabs" id="sections-tabs" role="tablist">
+                                <li class="nav-item content-tab">
+                                    <a class="nav-link active" data-bs-toggle="tab" href="#sections-new-tab" role="tab" aria-controls="components" aria-selected="false">
+                                        <i class="icon-albums-outline"></i> <div><span>Sections</span></div>
+                                    </a>
+                                </li>
+                            </ul>
+                            
+                            <div class="tab-content">
+                                <div class="tab-pane show active" id="sections-new-tab" data-section="content" role="tabpanel">
+                                    <div class="search">
+                                        <input class="form-control section-search" placeholder="Search sections" type="text" data-vvveb-action="search" data-vvveb-on="keyup">
+                                        <button class="clear-backspace" data-vvveb-action="clearSearch" title="Clear search">
+                                            <i class="la la-times"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="drag-elements-sidepane sidepane">
+                                        <div>
+                                            <ul class="sections-list clearfix" data-type="leftpanel"></ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane show" id="components-tabs" role="tabpanel" aria-labelledby="components-tab">
+                            <ul class="nav nav-tabs nav-fill nav-underline sections-tabs" role="tablist">
+                                <li class="nav-item components-tab">
+                                    <a class="nav-link active" data-bs-toggle="tab" href="#components" role="tab" aria-controls="components" aria-selected="true">
+                                        <i class="icon-cube-outline"></i> <div><span>Components</span></div>
+                                    </a>
+                                </li>
+                                <li class="nav-item blocks-tab">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#blocks" role="tab" aria-controls="components" aria-selected="false">
+                                        <i class="icon-copy-outline"></i> <div><span>Blocks</span></div>
+                                    </a>
+                                </li>
+                            </ul>
+                            
+                            <div class="tab-content">
+                                <div class="tab-pane show active components" id="components" data-section="components" role="tabpanel">
+                                    <div class="search">
+                                        <input class="form-control component-search" placeholder="Search components" type="text" data-vvveb-action="search" data-vvveb-on="keyup">
+                                        <button class="clear-backspace" data-vvveb-action="clearSearch">
+                                            <i class="la la-times"></i>
+                                        </button>
+                                    </div>
 
-					  <div class="float-end me-3">
+                                    <div class="drag-elements-sidepane sidepane">    
+                                        <div>
+                                            <ul class="components-list clearfix" data-type="leftpanel"></ul>
+                                        </div>                                         
+                                    </div>
+                                </div>
 
-					    <button class="btn btn-light border-0 btn-sm btn-dark-mode" data-vvveb-action="darkMode">
-							<!-- i class="la la-adjust la-lg"></i -->
-							<i class="la la-sun"></i>
-						</button>
-						
-					    <a href="#" class="btn btn-light btn-sm btn-preview-url" target="blank" title="View page">
-							<i class="la la-external-link-alt"></i>
-						</a>
+                                <div class="tab-pane show active blocks" id="blocks" data-section="content" role="tabpanel">
+                                    <div class="search">
+                                        <input class="form-control block-search" placeholder="Search blocks" type="text" data-vvveb-action="search" data-vvveb-on="keyup">
+                                        <button class="clear-backspace" data-vvveb-action="clearSearch">
+                                            <i class="la la-times"></i>
+                                        </button>
+                                    </div>
 
-					    <div class="btn-group responsive-btns" role="group">
+                                    <div class="drag-elements-sidepane sidepane">
+                                        <div>
+                                            <ul class="blocks-list clearfix" data-type="leftpanel"></ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
+                        <div class="tab-pane" id="configuration" role="tabpanel" aria-labelledby="configuration-tab">
+                            <ul class="nav nav-tabs nav-fill nav-underline sections-tabs" id="vars-tabs" role="tablist">
+                                <li class="nav-item vars-tab">
+                                    <a class="nav-link active" data-bs-toggle="tab" href="#vars-tab" role="tab" aria-controls="components" aria-selected="false">
+                                        <i class="icon-brush-outline"></i> <div><span>Variables</span></div>
+                                    </a>
+                                </li>
+                                <li class="nav-item css-tab">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#css-tab" role="tab" aria-controls="css" aria-selected="true">
+                                        <i class="icon-code-slash-outline"></i> <div><span>CSS</span></div>
+                                    </a>
+                                </li>
+                            </ul>
 
-		 			 <button id="mobile-view" data-view="mobile" class="btn btn-light"  title="Mobile view" data-vvveb-action="viewport">
-						  <i class="la la-mobile"></i>
-					  </button>
+                            <div class="tab-content">
+                                <div class="tab-pane show active" id="vars-tab" data-section="vars" role="tabpanel">
+                                    <div class="drag-elements-sidepane sidepane">
+                                        <div data-offset="80">
+                                            <div class="component-properties">
+                                                <input class="header_check" type="checkbox" checked id="header_pallette">
+                                                <div class="tab-pane section px-0" data-section="content"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="tab-pane" id="css-tab" data-section="css" role="tabpanel">
+                                    <div class="drag-elements-sidepane sidepane">
+                                        <div data-offset="80">
+                                            <textarea id="css-editor" class="form-control" rows="24"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-					  <button id="tablet-view"  data-view="tablet" class="btn btn-light"  title="Tablet view" data-vvveb-action="viewport">
-						  <i class="la la-tablet"></i>
-					  </button>
-					  
-					  <button id="desktop-view"  data-view="" class="btn btn-light"  title="Desktop view" data-vvveb-action="viewport">
-						  <i class="la la-laptop"></i>
-					  </button>
-			
-					<div class="percent">
-					   <input type="number" id="zoom" value="100" step="10" min="10" max="100" class="form-control" data-vvveb-action="zoomChange" data-vvveb-on="change">
+    <div id="canvas">
+        <div id="iframe-wrapper">
+            <div id="iframe-layer">
+                <div class="loading-message active">
+                    <div class="animation-container">
+                        <div class="dot dot-1"></div>
+                        <div class="dot dot-2"></div>
+                        <div class="dot dot-3"></div>
+                    </div>
+                </div>
+                
+                <div id="highlight-box">
+                    <div id="highlight-name">
+                        <span class="name"></span>
+                        <span class="type"></span>
+                    </div>
+                    
+                    <div id="section-actions">
+                        <a id="add-section-btn" href="" title="Add element"><i class="la la-plus"></i></a>
+                    </div>
+                </div>
 
-					</div>
-					</div>
-										
-				</div>	
-				
-     				   </div>
+                <div id="select-box">
+                    <div id="wysiwyg-editor" class="default-editor">
+                        <!-- WYSIWYG toolbar content -->
+                        <a id="bold-btn" class="hint" href="" title="Bold" aria-label="Bold">
+                            <svg height="18" viewBox="0 0 24 24" width="18">
+                                <path d="M6,4h8a4,4,0,0,1,4,4h0a4,4,0,0,1-4,4H6Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+                                <path d="M6,12h9a4,4,0,0,1,4,4h0a4,4,0,0,1-4,4H6Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+                            </svg>    
+                        </a>
+                        <a id="italic-btn" class="hint" href="" title="Italic" aria-label="Italic">
+                            <svg height="18" viewBox="0 0 24 24" width="18">
+                                <line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="19" x2="10" y1="4" y2="4"/>
+                                <line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="14" x2="5" y1="20" y2="20"/>
+                                <line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="15" x2="9" y1="4" y2="20"/>
+                            </svg>                                    
+                        </a>
+                        <a id="underline-btn" class="hint" href="" title="Underline" aria-label="Underline">
+                            <svg height="18" viewBox="0 0 24 24" width="18">
+                                <path d="M6,4v7a6,6,0,0,0,6,6h0a6,6,0,0,0,6-6V4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                <line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="4" x2="20" y1="22" y2="22"/>
+                            </svg>
+                        </a>
+                    </div>
 
+                    <div id="select-actions">
+                        <a id="drag-btn" href="" title="Drag element"><i class="la la-arrows-alt"></i></a>
+                        <a id="parent-btn" href="" title="Select parent" class="la-rotate-180"><i class="la la-level-up-alt"></i></a>
+                        <a id="up-btn" href="" title="Move element up"><i class="la la-arrow-up"></i></a>
+                        <a id="down-btn" href="" title="Move element down"><i class="la la-arrow-down"></i></a>
+                        <a id="clone-btn" href="" title="Clone element"><i class="icon-copy-outline"></i></a>
+                        <a id="delete-btn" href="" title="Remove element"><i class="icon-trash-outline"></i></a>
+                    </div>
+                </div>
+                
+                <div id="drop-highlight-box"></div>
+            </div>
+                
+            <iframe src="" id="iframe1"></iframe>
+        </div>
+    </div>
 
-				<div id="left-panel">
-					  <div>
-					  <div id="filemanager"> 
-							<div class="header">
-								<span class="text-secondary"><i class="la la-file la-lg"></i> Pages</span>
+    <div id="right-panel" class="mobile-hide">
+        <div class="component-properties">
+            <ul class="nav nav-tabs nav-fill nav-underline" id="properties-tabs" role="tablist">
+                <li class="nav-item content-tab">
+                    <a class="nav-link active" data-bs-toggle="tab" href="#content-tab" role="tab" aria-controls="components" aria-selected="true">
+                        <i class="icon-albums-outline"></i> <span>Content</span>
+                    </a>
+                </li>
+                <li class="nav-item style-tab">
+                    <a class="nav-link" data-bs-toggle="tab" href="#style-tab" role="tab" aria-controls="blocks" aria-selected="false">
+                        <i class="icon-color-fill-outline"></i> <span>Style</span>
+                    </a>
+                </li>
+                <li class="nav-item advanced-tab">
+                    <a class="nav-link" data-bs-toggle="tab" href="#advanced-tab" role="tab" aria-controls="blocks" aria-selected="false">
+                        <i class="icon-settings-outline"></i> <span>Advanced</span>
+                    </a>
+                </li>
+            </ul>
 
-									<div class="btn-group responsive-btns float-end" role="group">
-									  <button class="btn btn-outline-primary btn-sm btn-add" title="New page (Ctrl + Shift + P)" id="new-file-btn" data-vvveb-action="newPage" data-vvveb-shortcut="">
-									<!-- <span>Add new</span> -->
-									<i class="icon-add"></i>
-									  </button>
-									  
-									  <!--  &ensp;
-									  <button class="btn btn-link text-dark p-0"  title="Delete file" id="delete-file-btn" data-vvveb-action="deletePage" data-vvveb-shortcut="">
-										  <i class="la la-trash"></i> <small>Delete</small>
-									  </button> -->
-									</div>
+            <div class="tab-content">
+                <div class="tab-pane show active" id="content-tab" data-section="content" role="tabpanel">
+                    <div class="alert alert-dismissible fade show alert-light m-3" role="alert">        
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>        
+                        <strong>No selected element!</strong><br> Click on an element to edit.        
+                    </div>
+                </div>
+                
+                <div class="tab-pane show" id="style-tab" data-section="style" role="tabpanel">
+                    <div class="border-bottom pb-2 px-2">
+                        <div class="justify-content-end d-flex">
+                            <select class="form-select w-50" data-vvveb-action="setState" data-vvveb-on="change">
+                                <option value=""> - State - </option>
+                                <option value="hover">hover</option>
+                                <option value="active">active</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-pane show" id="advanced-tab" data-section="advanced" role="tabpanel"></div>
+            </div>
+        </div>
+    </div>
+</div>
 
-								</div>
+<!-- Scripts -->
+<script src="js/popper.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
 
-								<div class="tree">
-									<ol>
-									</ol>
-								</div>
-					  </div>
-					  
-					  
-					 <div class="drag-elements">
-						
-						<div class="header">
-							<ul class="nav nav-tabs  nav-fill" id="elements-tabs" role="tablist">
-							  <li class="nav-item sections-tab">
-								<a class="nav-link active" id="sections-tab" data-bs-toggle="tab" href="#sections" role="tab" aria-controls="sections" aria-selected="true" title="Sections">
-									<i class="icon-layers-outline"></i>
-									<!-- img src="../../../js/vvvebjs/icons/list_group.svg" height="23" --> 
-									<!-- div><small>Sections</small></div -->
-								</a>
-							  </li>
-							  <li class="nav-item component-tab">
-								<a class="nav-link" id="components-tab" data-bs-toggle="tab" href="#components-tabs" role="tab" aria-controls="components" aria-selected="false" title="Components">
-									<i class="icon-cube-outline"></i>
-									<!-- img src="../../../js/vvvebjs/icons/product.svg" height="23" --> 
-									<!-- div><small>Components</small></div -->
-								</a>
-							  </li>
-							  <!-- li class="nav-item sections-tab">
-								<a class="nav-link" id="sections-tab" data-bs-toggle="tab" href="#sections" role="tab" aria-controls="sections" aria-selected="false" title="Sections"><img src="../../../js/vvvebjs/icons/list_group.svg" width="24" height="23"> <div><small>Sections</small></div></a>
-							  </li -->
-							  <li class="nav-item component-properties-tab d-none">
-								<a class="nav-link" id="properties-tab" data-bs-toggle="tab" href="#properties" role="tab" aria-controls="properties" aria-selected="false" title="Properties">
-									<i class="icon-settings-outline"></i>
-									<!-- img src="../../../js/vvvebjs/icons/filters.svg" height="23"--> 
-									<!-- div><small>Properties</small></div -->
-								</a>
-							  </li>
-							  <li class="nav-item component-configuration-tab">
-								<a class="nav-link" id="configuration-tab" data-bs-toggle="tab" href="#configuration" role="tab" aria-controls="configuration" aria-selected="false" title="Styles">
-									<i class="icon-color-wand-outline"></i>
-									<!-- img src="../../../js/vvvebjs/icons/filters.svg" height="23"--> 
-									<!-- div><small>Properties</small></div -->
-								</a>
-							  </li>
-							</ul>
-					
-							<div class="tab-content">
-							  
-							  
-							  <div class="tab-pane show active sections" id="sections" role="tabpanel" aria-labelledby="sections-tab">
-								  
+<!-- Mobile drag and drop support -->
+<script src="js/mobile-drag-drop.js"></script>
 
-										<ul class="nav nav-tabs nav-fill nav-underline  sections-tabs" id="sections-tabs" role="tablist">
-										  <li class="nav-item content-tab">
-											<a class="nav-link active" data-bs-toggle="tab" href="#sections-new-tab" role="tab" aria-controls="components" aria-selected="false">
-												<i class="icon-albums-outline"></i> <div><span>Sections</span></div></a>
-										  </li>
-										  <li class="nav-item style-tab">
-											<a class="nav-link" data-bs-toggle="tab" href="#sections-list" role="tab" aria-controls="sections" aria-selected="true">
-												 <i class="icon-document-text-outline"></i><div><span>Page Sections</span></div></a>
-										  </li>
-										</ul>
-								
-										<div class="tab-content">
-		
-											 <div class="tab-pane" id="sections-list" data-section="style" role="tabpanel" aria-labelledby="style-tab">
-												<div class="drag-elements-sidepane sidepane">
-												  <div>
-													<div class="sections-container p-4">
-																													  
-															<div class="section-item" draggable="true">
-																<div class="controls">
-																	<div class="handle"></div>
-																	<div class="info">
-																		<div class="name">&nbsp;
-																			<div class="type">&nbsp;</div>
+<!-- VvvebJs core -->
+<script src="libs/builder/builder.js"></script>    
+<script src="libs/builder/undo.js"></script>    
+<script src="libs/builder/inputs.js"></script>    
+
+<!-- Media gallery -->
+<link href="libs/media/media.css" rel="stylesheet">
+<script>
+window.mediaPath = '../../media';
+Vvveb.themeBaseUrl = 'demo/landing/';
+</script>
+<script src="libs/media/media.js"></script>    
+<script src="libs/builder/plugin-media.js"></script>    
+
+<!-- Components -->
+<script src="libs/builder/plugin-google-fonts.js"></script>    
+<script src="libs/builder/components-common.js"></script>    
+<script src="libs/builder/plugin-aos.js"></script>
+<script src="libs/builder/components-html.js"></script>    
+<script src="libs/builder/components-elements.js"></script>    
+<script src="libs/builder/section.js"></script>    
+<script src="libs/builder/components-bootstrap5.js"></script>    
+<script src="libs/builder/components-widgets.js"></script>    
+<script src="libs/builder/oembed.js"></script>
+<script src="libs/builder/components-embeds.js"></script>
+
+<!-- Sections and blocks -->
+<script src="demo/landing/sections/sections.js"></script>
+<script src="libs/builder/sections-bootstrap4.js"></script>
+<script src="libs/builder/blocks-bootstrap4.js"></script>
+
+<!-- Code editor -->
+<link href="libs/codemirror/lib/codemirror.css" rel="stylesheet"/>
+<link href="libs/codemirror/theme/material.css" rel="stylesheet"/>
+<script src="libs/codemirror/lib/codemirror.js"></script>
+<script src="libs/codemirror/lib/xml.js"></script>
+<script src="libs/codemirror/lib/css.js"></script>
+<script src="libs/codemirror/lib/formatting.js"></script>
+<script src="libs/builder/plugin-codemirror.js"></script>    
+
+<!-- Download functionality -->
+<script src="libs/jszip/jszip.min.js"></script>
+<script src="libs/jszip/filesaver.min.js"></script>
+<script src="libs/builder/plugin-jszip.js"></script>
+
+<script>
+// Mobile-specific configuration
+const isMobile = window.innerWidth <= 768;
+
+// Configure serverless URLs
+let renameUrl = 'api/save.js?action=rename';
+let deleteUrl = 'api/save.js?action=delete';    
+let saveReusableUrl = 'api/save.js?action=saveReusable';    
+let oEmbedProxyUrl = 'api/save.js?action=oembedProxy';
+
+// Default pages configuration
+let defaultPages = {
+    "index": {
+        name: "index",
+        filename: "index.html",
+        file: "demo/landing/index.html",
+        url: "demo/landing/index.html",
+        title: "Home page",
+        folder: null,
+        description: "Website homepage"
+    },
+    "blank": {
+        name: "blank",
+        filename: "blank.html",
+        file: "demo/landing/blank.html",
+        url: "demo/landing/blank.html",
+        title: "Blank page",
+        folder: null,
+        description: "Template page for new pages"
+    }
+};    
+
+let pages = defaultPages;
+
+// Mobile panel management
+function setupMobilePanels() {
+    if (!isMobile) return;
+    
+    const leftPanel = document.getElementById('left-panel');
+    const rightPanel = document.getElementById('right-panel');
+    const toggleLeft = document.getElementById('toggle-left-panel-mobile');
+    const toggleRight = document.getElementById('toggle-right-panel-mobile');
+    
+    // Initially hide panels on mobile
+    leftPanel.classList.add('mobile-hide');
+    rightPanel.classList.add('mobile-hide');
+    
+    toggleLeft.addEventListener('click', function() {
+        leftPanel.classList.toggle('mobile-hide');
+        rightPanel.classList.add('mobile-hide');
+        this.classList.toggle('active');
+        toggleRight.classList.remove('active');
+    });
+    
+    toggleRight.addEventListener('click', function() {
+        rightPanel.classList.toggle('mobile-hide');
+        leftPanel.classList.add('mobile-hide');
+        this.classList.toggle('active');
+        toggleLeft.classList.remove('active');
+    });
+    
+    // Close panels when clicking canvas on mobile
+    document.getElementById('canvas').addEventListener('click', function() {
+        if (isMobile) {
+            leftPanel.classList.add('mobile-hide');
+            rightPanel.classList.add('mobile-hide');
+            toggleLeft.classList.remove('active');
+            toggleRight.classList.remove('active');
+        }
+    });
+}
+
+// Enhanced save functionality for serverless
+function setupServerlessSave() {
+    // Override the default save action
+    const originalSaveAjax = Vvveb.Builder.saveAjax;
+    
+    Vvveb.Builder.saveAjax = function(fileName, html) {
+        const loadingOverlay = document.getElementById('loading-overlay');
+        loadingOverlay.classList.remove('hidden');
+        
+        fetch('api/save.js', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'save',
+                file: fileName,
+                html: html
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Also save to localStorage for offline access
+                localStorage.setItem('vvveb_page_' + fileName, html);
+                localStorage.setItem('vvveb_page_timestamp_' + fileName, new Date().toISOString());
+                
+                // Show success message
+                const toast = document.createElement('div');
+                toast.className = 'alert alert-success alert-dismissible fade show position-fixed';
+                toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
+                toast.innerHTML = `
+                    <strong>Success!</strong> Page saved successfully.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => toast.remove(), 3000);
+            } else {
+                throw new Error(data.message || 'Save failed');
+            }
+        })
+        .catch(error => {
+            console.error('Save error:', error);
+            
+            // Fallback to localStorage
+            localStorage.setItem('vvveb_page_' + fileName, html);
+            localStorage.setItem('vvveb_page_timestamp_' + fileName, new Date().toISOString());
+            
+            const toast = document.createElement('div');
+            toast.className = 'alert alert-warning alert-dismissible fade show position-fixed';
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
+            toast.innerHTML = `
+                <strong>Warning!</strong> Saved locally only. Check connection.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        })
+        .finally(() => {
+            loadingOverlay.classList.add('hidden');
+        });
+    };
+}
+
+// Initialize everything
+document.addEventListener('DOMContentLoaded', function() {
+    // Hide loading overlay after a short delay
+    setTimeout(() => {
+        document.getElementById('loading-overlay').classList.add('hidden');
+    }, 1000);
+    
+    // Setup mobile-specific features
+    setupMobilePanels();
+    setupServerlessSave();
+    
+    // Initialize VvvebJs
+    let firstPage = Object.keys(pages)[0];
+    
+    Vvveb.Builder.init(pages[firstPage]["url"], function() {
+        // VvvebJs loaded successfully
+        console.log('VvvebJs initialized');
+    });
+
+    Vvveb.Gui.init();
+    Vvveb.FileManager.init();
+    Vvveb.SectionList.init();
+    Vvveb.TreeList.init();
+    Vvveb.Breadcrumb.init();
+    Vvveb.CssEditor.init();
+
+    Vvveb.FileManager.addPages(pages);
+    Vvveb.FileManager.loadPage(pages[firstPage]["name"]);
+    
+    // Hide right panel initially for mobile
+    if (isMobile) {
+        Vvveb.Gui.toggleRightColumn(false);
+    }
+});
+
+// Service worker for offline functionality (optional)
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(console.error);
+}
+</script>
+
+</body>
+</html>																	<div class="type">&nbsp;</div>
 																		</div>
 																	</div>
 																</div>
