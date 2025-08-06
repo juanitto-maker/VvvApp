@@ -1,29 +1,12 @@
 {
   "name": "vvvebjs-ai-designer",
-  "description": "AI-powered drag and drop website builder",
   "version": "1.0.0",
-  "author": "AI Designer",
-  "license": "Apache-2.0",
-  "main": "editor.html",
-  "engines": {
-    "node": "18.x"
-  },
+  "description": "AI-powered drag and drop website builder",
+  "main": "index.html",
   "scripts": {
-    "dev": "vercel dev",
-    "deploy": "vercel"
+    "start": "echo 'Static site - no build needed'"
   },
   "dependencies": {
     "@vercel/node": "^3.0.0"
-  },
-  "devDependencies": {
-    "vercel": "^32.0.0"
-  },
-  "keywords": [
-    "vvvebjs",
-    "drag-drop",
-    "wysiwyg",
-    "web-builder",
-    "ai-designer",
-    "mobile-friendly"
-  ]
+  }
 }
