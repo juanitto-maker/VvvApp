@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VvvebJs AI Designer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 600px;
+            padding: 40px 20px;
+        }
+        
+        .logo {
+            font-size: 3em;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        }
+        
+        .subtitle {
+            font-size: 1.3em;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+        
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            min-width: 200px;
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            background: white;
+            color: #667eea;
+        }
+        
+        .status {
+            margin-top: 30px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            .logo {
+                font-size: 2.5em;
+            }
+            
+            .subtitle {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🎨 VvvebJs</div>
+        <p class="subtitle">AI-Powered Website Builder</p>
+        
+        <div class="buttons">
+            <a href="/editor.html" class="btn btn-primary">🚀 Launch Editor</a>
+            <a href="/test-api.html" class="btn">🔧 Test API</a>
+            <a href="/diagnostics.html" class="btn">📊 Diagnostics</a>
+        </div>
+        
+        <div class="status">
+            <div class="status-item">
+                <span>🌐 Deployment</span>
+                <span id="deploy-status">✅ Active</span>
+            </div>
+            <div class="status-item">
+                <span>📱 Mobile Ready</span>
+                <span>✅ Optimized</span>
+            </div>
+            <div class="status-item">
+                <span>⚡ API Status</span>
+                <span id="api-status">🔄 Checking...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test API on load
+        async function checkAPI() {
+            try {
+                const response = await fetch('/api/save.js');
+                const apiStatus = document.getElementById('api-status');
+                
+                if (response.ok) {
+                    apiStatus.textContent = '✅ Working';
+                } else {
+                    apiStatus.textContent = '❌ Error';
+                }
+            } catch (error) {
+                document.getElementById('api-status').textContent = '❌ Failed';
+            }
+        }
+        
+        // Auto-redirect to editor if directly accessing with editor intent
+        if (window.location.search.includes('editor') || window.location.hash.includes('editor')) {
+            window.location.href = '/editor.html';
+        }
+        
+        // Check API status
+        checkAPI();
+    </script>
+</body>
+</html>
